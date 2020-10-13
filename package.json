@@ -1,0 +1,27 @@
+{
+  "name": "news-explorer-api",
+  "version": "1.0.0",
+  "description": "Бэкенд приложения",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MaximStovba/news-explorer-api.git"
+  },
+  "author": "Maxim Stovba",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MaximStovba/news-explorer-api/issues"
+  },
+  "homepage": "https://github.com/MaximStovba/news-explorer-api#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "nodemon": "^2.0.5"
+  }
+}
