@@ -1,12 +1,11 @@
-const http = require('http');
+const express = require('express');
 
-const server = http.createServer((req, res) => {
-    res.writeHead(200, {
-        'Content-Type': 'text/html'
-    });
+// Слушаем 3000 порт
+const { PORT = 3000 } = process.env;
 
-    // в методе end тоже можно передать данные
-    res.end('<h1>Hello, World!</h1>', 'utf8');
-});
+const app = express();
 
-server.listen(3000);
+app.listen(PORT, () => {
+    // Если всё работает, консоль покажет, какой порт приложение слушает
+    console.log(`App listening on port ${PORT}`)
+})

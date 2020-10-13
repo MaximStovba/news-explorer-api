@@ -18,7 +18,15 @@
     "url": "https://github.com/MaximStovba/news-explorer-api/issues"
   },
   "homepage": "https://github.com/MaximStovba/news-explorer-api#readme",
-  "dependencies": {},
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "celebrate": "^13.0.3",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "mongoose": "^5.10.9",
+    "validator": "^13.1.17"
+  },
   "devDependencies": {
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.22.1",
