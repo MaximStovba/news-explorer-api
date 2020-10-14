@@ -1,5 +1,6 @@
 // controllers/users.js
 
+const jwt = require('jsonwebtoken'); // импортируем модуль jsonwebtoken
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-err'); // 404
 
@@ -19,18 +20,50 @@ function getMe(req, res, next) {
     });
 }
 
-// POST /users (временное решение - создание пользователя)
+// POST /signin — аутентификация пользователя
+function login(req, res, next) {
+  const { NODE_ENV, JWT_SECRET } = process.env;
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => { // аутентификация успешна!
+      // создадим токен
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key',
+        { expiresIn: '7d' }, // токен будет просрочен через неделю
+      );
+
+      // вернём токен (JWT в localStorage)
+      res.send({ token });
+    })
+    .catch(next);
+}
+
+// POST /signup — создаёт пользователя
 function createUser(req, res, next) {
-  const { name, password, email } = req.body;
-  
-  User.create({ name, password, email })
+  const SALT_NUM = 10;
+  const {
+    name,
+    email,
+    password,
+  } = req.body;
+  // хешируем пароль
+  return User.createUserByCredentials(name, email, password, SALT_NUM)
     // вернём записанные в базу данные
-    .then(user => res.send({ data: user }))
+    .then((user) => res.status(200).send({ data: user }))
     // данные не записались, вернём ошибку
-    .catch(err => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      // console.log(err.message);
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: err.message });
+      }
+      return next(err);
+    });
 }
 
 module.exports = {
   getMe,
+  login,
   createUser,
 };

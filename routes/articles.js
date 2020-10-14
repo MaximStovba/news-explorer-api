@@ -8,7 +8,7 @@ const {
   getUsersArticles,
   createArticle,
   deleteArticle,
- } = require('../controllers/articles');
+} = require('../controllers/articles');
 
 // возвращает все сохранённые пользователем статьи
 // GET /articles
@@ -20,7 +20,7 @@ router.get('/', getUsersArticles);
 router.post('/', createArticle);
 
 // удаляет сохранённую статью  по _id
-// DELETE /articles/articleId
+// DELETE /articles/:articleId
 router.delete('/:articleId', deleteArticle);
 
 module.exports = router;

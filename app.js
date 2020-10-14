@@ -1,11 +1,20 @@
+require('dotenv').config(); // env-переменные из файла добавятся в process.env
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const { celebrate, Joi, errors } = require('celebrate');
 
 const {
   userRouter,
-  // articleRouter
+  articleRouter,
 } = require('./routes');
+
+const {
+  login,
+  createUser,
+} = require('./controllers/users');
+
+const { auth } = require('./middlewares/auth');
 
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
@@ -34,17 +43,52 @@ mongoose.connect('mongodb://localhost:27017/newsdb', {
 // временное решение авторизации
 app.use((req, res, next) => {
   req.user = {
-    _id: '5f86e6a5fb66f13240e8cd3a',
+    _id: '5f8738ceaa434f447e15fb73',
   };
 
   next();
 });
 
+// --------------------------------
+// роуты не требующие авторизации
+// --------------------------------
+app.post('/signup', celebrate({ // POST /signup — создаёт пользователя
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8),
+  }),
+}), createUser);
+
+app.post('/signin', celebrate({ // POST /signin — аутентификация пользователя
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8),
+  }),
+}), login);
+
+// мидлвер авторизации пользователя
+app.use(auth);
+
 // -------------------------------
-// роуты
+// роуты, требующие авторизации
 // -------------------------------
 app.use('/users/', userRouter); // user router
-// app.use('/articles/', articleRouter); // article router
+app.use('/articles/', articleRouter); // article router
+
+// -------------------------------
+// ловим -= 404 =-
+// -------------------------------
+app.use((req, res) => {
+  res
+    .status(404)
+    .send({ message: 'Запрашиваемый ресурс не найден' });
+});
+
+// -------------------------------
+// обработчик ошибок celebrate
+// -------------------------------
+app.use(errors());
 
 // -------------------------------
 // централизовано обрабатываем все ошибки
