@@ -14,7 +14,9 @@ const {
   createUser,
 } = require('./controllers/users');
 
+// экспортируем мидлверы
 const { auth } = require('./middlewares/auth');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
@@ -48,6 +50,8 @@ app.use((req, res, next) => {
 
   next();
 });
+
+app.use(requestLogger); // подключаем логгер запросов
 
 // --------------------------------
 // роуты не требующие авторизации
@@ -84,6 +88,8 @@ app.use((req, res) => {
     .status(404)
     .send({ message: 'Запрашиваемый ресурс не найден' });
 });
+
+app.use(errorLogger); // подключаем логгер ошибок
 
 // -------------------------------
 // обработчик ошибок celebrate

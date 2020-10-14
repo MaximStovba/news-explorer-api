@@ -2,6 +2,8 @@
 
 // импортируем модель
 const Article = require('../models/article');
+const BadRequestError = require('../errors/bad-request-err'); // 400
+const ForbiddenError = require('../errors/forbidden-err'); // 403
 const NotFoundError = require('../errors/not-found-err'); // 404
 
 // возвращает все сохранённые пользователем статьи
@@ -43,7 +45,8 @@ function createArticle(req, res, next) {
     // данные не записались, вернём ошибку
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Ошибка валидации!' });
+        const e = new BadRequestError('Ошибка валидации!');
+        return next(e);
       }
       return next(err);
     });
@@ -60,12 +63,13 @@ function deleteArticle(req, res, next) {
           .then((article) => res.status(200).send({ data: article }))
           .catch(next);
       }
-      // При попытке удалить чужую карточку возвращается ошибка со статусом 403
-      return res.status(403).send({ message: `Отсутствуют права на удаление статьи ${req.params.articleId}` });
+      // При попытке удалить чужую карточку выбрасываем исключение
+      throw new ForbiddenError('Отсутствуют права на удаление данной статьи!');
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'C запросом что-то не так!' });
+        const e = new BadRequestError('C запросом что-то не так!');
+        return next(e);
       }
       return next(err);
     });

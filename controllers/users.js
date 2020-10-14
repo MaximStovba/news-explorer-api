@@ -2,6 +2,7 @@
 
 const jwt = require('jsonwebtoken'); // импортируем модуль jsonwebtoken
 const User = require('../models/user');
+const BadRequestError = require('../errors/bad-request-err'); // 400
 const NotFoundError = require('../errors/not-found-err'); // 404
 
 // возвращает информацию о пользователе (email и имя)
@@ -14,7 +15,8 @@ function getMe(req, res, next) {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'C запросом что-то не так!' });
+        const e = new BadRequestError('C запросом что-то не так!');
+        return next(e);
       }
       return next(err);
     });
@@ -54,9 +56,9 @@ function createUser(req, res, next) {
     .then((user) => res.status(200).send({ data: user }))
     // данные не записались, вернём ошибку
     .catch((err) => {
-      // console.log(err.message);
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: err.message });
+        const e = new BadRequestError('Ошибка валидации!');
+        return next(e);
       }
       return next(err);
     });
