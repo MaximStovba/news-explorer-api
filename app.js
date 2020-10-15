@@ -42,14 +42,6 @@ mongoose.connect('mongodb://localhost:27017/newsdb', {
   console.log(`db error ${err.message}`);
 });
 
-// временное решение авторизации
-// app.use((req, res, next) => {
-//  req.user = {
-//    _id: '5f8738ceaa434f447e15fb73',
-//  };
-//  next();
-// });
-
 app.use(requestLogger); // подключаем логгер запросов
 
 // --------------------------------
