@@ -1,5 +1,7 @@
 // models/article.js
 const mongoose = require('mongoose');
+const NotFoundError = require('../errors/not-found-err'); // 404
+const ForbiddenError = require('../errors/forbidden-err'); // 403
 
 const articleSchema = new mongoose.Schema({
   // Ключевое слово, по которому ищутся статьи. Обязательное поле-строка.
@@ -58,6 +60,21 @@ const articleSchema = new mongoose.Schema({
     select: false,
   },
 });
+
+// добавим метод deleteArticleOfUser схеме пользователя
+// у него будет параметры — идентификатор пользователя и идентификатор статьи
+articleSchema.statics.deleteArticleOfUser = function deleteArticle(owner, articleId) {
+  return this.findById(articleId).select('+owner')
+    .orFail(new NotFoundError('Нет статьи с таким id!'))
+    .then((articleInf) => {
+      if (String(articleInf.owner) === owner) {
+        return this.findByIdAndRemove(articleId)
+          .then((article) => article); // данные удаленой статьи доступны
+      }
+      // При попытке удалить чужую статью выбрасываем исключение
+      throw new ForbiddenError('Отсутствуют права на удаление данной статьи!');
+    });
+};
 
 // создаём модель и экспортируем её
 module.exports = mongoose.model('article', articleSchema);

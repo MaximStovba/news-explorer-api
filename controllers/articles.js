@@ -3,8 +3,6 @@
 // импортируем модель
 const Article = require('../models/article');
 const BadRequestError = require('../errors/bad-request-err'); // 400
-const ForbiddenError = require('../errors/forbidden-err'); // 403
-const NotFoundError = require('../errors/not-found-err'); // 404
 
 // возвращает все сохранённые пользователем статьи
 // GET /articles
@@ -41,7 +39,13 @@ function createArticle(req, res, next) {
     owner,
   })
     // вернём записанные в базу данные
-    .then((article) => res.status(200).send({ data: article }))
+    .then((article) => {
+      Article.findById(article._id)
+        .then((articleInf) => {
+          res.status(200).send({ data: articleInf });
+        })
+        .catch(next);
+    })
     // данные не записались, вернём ошибку
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -55,21 +59,14 @@ function createArticle(req, res, next) {
 // удаляет сохранённую статью  по _id
 // DELETE /articles/:articleId
 function deleteArticle(req, res, next) {
-  Article.findById(req.params.articleId)
-    .orFail(new NotFoundError('Нет статьи с таким id!'))
+  Article.deleteArticleOfUser(req.user._id, req.params.articleId)
+    // вернём записанные в базу данные
     .then((articleInf) => {
-      if (String(articleInf.owner) === req.user._id) {
-        return Article.findByIdAndRemove(req.params.articleId)
-          .then((article) => res.status(200).send({ data: article }))
-          .catch(next);
-      }
-      // При попытке удалить чужую карточку выбрасываем исключение
-      throw new ForbiddenError('Отсутствуют права на удаление данной статьи!');
+      res.status(200).send({ data: articleInf });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        const e = new BadRequestError('C запросом что-то не так!');
-        return next(e);
+        return next(new BadRequestError('C запросом что-то не так!'));
       }
       return next(err);
     });
