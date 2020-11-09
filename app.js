@@ -1,5 +1,6 @@
 require('dotenv').config(); // env-переменные из файла добавятся в process.env
 const express = require('express');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const { celebrate, Joi, errors } = require('celebrate');
@@ -41,6 +42,29 @@ mongoose.connect('mongodb://localhost:27017/newsdb', {
 }).catch((err) => {
   console.log(`db error ${err.message}`);
 });
+
+// ----------------- CORS ---------------- //
+const whitelist = ['http://localhost:3000',
+  'https://www.api.news.students.nomoreparties.xyz',
+  'http://www.api.news.students.nomoreparties.xyz',
+  'https://api.news.students.nomoreparties.xyz',
+  'http://api.news.students.nomoreparties.xyz'];
+
+const corsOptionsDelegate = (req, callback) => {
+  let corsOptions;
+  if (whitelist.indexOf(req.header('Origin')) !== -1) {
+    corsOptions = {
+      credentials: true, // This is important.
+      origin: true,
+    }; // reflect (enable) the requested origin in the CORS response
+  } else {
+    corsOptions = { origin: false }; // disable CORS for this request
+  }
+  callback(null, corsOptions); // callback expects two parameters: error and options
+};
+
+app.use(cors(corsOptionsDelegate));
+// ----------------- CORS ---------------- //
 
 app.use(requestLogger); // подключаем логгер запросов
 
