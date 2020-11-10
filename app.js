@@ -45,10 +45,10 @@ mongoose.connect('mongodb://localhost:27017/newsdb', {
 
 // ----------------- CORS ---------------- //
 const whitelist = ['http://localhost:3000',
-  'https://www.api.newsex.students.nomoreparties.co',
-  'http://www.api.newsex.students.nomoreparties.co',
-  'https://api.newsex.students.nomoreparties.co',
-  'http://api.newsex.students.nomoreparties.co'];
+  'https://www.newsex.students.nomoreparties.co',
+  'http://www.newsex.students.nomoreparties.co',
+  'https://newsex.students.nomoreparties.co',
+  'http://newsex.students.nomoreparties.co'];
 
 const corsOptionsDelegate = (req, callback) => {
   let corsOptions;
