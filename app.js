@@ -5,22 +5,16 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const { celebrate, Joi, errors } = require('celebrate');
 
-const {
-  userRouter,
-  articleRouter,
-} = require('./routes');
+const { userRouter, articleRouter } = require('./routes');
 
-const {
-  login,
-  createUser,
-} = require('./controllers/users');
+const { login, createUser } = require('./controllers/users');
 
 // экспортируем мидлверы
 const { auth } = require('./middlewares/auth');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 // Слушаем 3000 порт
-const { PORT = 3000 } = process.env;
+const { PORT = 3001 } = process.env;
 
 const app = express();
 
@@ -32,23 +26,29 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // -------------------------------
 // подключаемся к серверу mongo
 // -------------------------------
-mongoose.connect('mongodb://localhost:27017/newsdb', {
-  useNewUrlParser: true,
-  useCreateIndex: true,
-  useFindAndModify: false,
-  useUnifiedTopology: true,
-}).then(() => {
-  console.log('connection to database established');
-}).catch((err) => {
-  console.log(`db error ${err.message}`);
-});
+mongoose
+  .connect('mongodb://localhost:27017/newsdb', {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log('connection to database established');
+  })
+  .catch((err) => {
+    console.log(`db error ${err.message}`);
+  });
 
 // ----------------- CORS ---------------- //
-const whitelist = ['http://localhost:3000',
-  'https://www.newsex.students.nomoreparties.co',
-  'http://www.newsex.students.nomoreparties.co',
-  'https://newsex.students.nomoreparties.co',
-  'http://newsex.students.nomoreparties.co'];
+const whitelist = [
+  'http://localhost:3000',
+  // Адреса не валидны:
+  // 'https://www.newsex.students.nomoreparties.co',
+  // 'http://www.newsex.students.nomoreparties.co',
+  // 'https://newsex.students.nomoreparties.co',
+  // 'http://newsex.students.nomoreparties.co',
+];
 
 const corsOptionsDelegate = (req, callback) => {
   let corsOptions;
@@ -71,20 +71,30 @@ app.use(requestLogger); // подключаем логгер запросов
 // --------------------------------
 // роуты не требующие авторизации
 // --------------------------------
-app.post('/signup', celebrate({ // POST /signup — создаёт пользователя
-  body: Joi.object().keys({
-    name: Joi.string().required().min(2).max(30),
-    email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
+app.post(
+  '/signup',
+  celebrate({
+    // POST /signup — создаёт пользователя
+    body: Joi.object().keys({
+      name: Joi.string().required().min(2).max(30),
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(8),
+    }),
   }),
-}), createUser);
+  createUser
+);
 
-app.post('/signin', celebrate({ // POST /signin — аутентификация пользователя
-  body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
+app.post(
+  '/signin',
+  celebrate({
+    // POST /signin — аутентификация пользователя
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(8),
+    }),
   }),
-}), login);
+  login
+);
 
 // мидлвер авторизации пользователя
 app.use(auth);
@@ -99,9 +109,7 @@ app.use('/articles/', articleRouter); // article router
 // ловим -= 404 =-
 // -------------------------------
 app.use((req, res) => {
-  res
-    .status(404)
-    .send({ message: 'Запрашиваемый ресурс не найден' });
+  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
 });
 
 app.use(errorLogger); // подключаем логгер ошибок
@@ -118,14 +126,10 @@ app.use((err, req, res, next) => {
   // если у ошибки нет статуса, выставляем 500
   const { statusCode = 500, message } = err;
 
-  res
-    .status(statusCode)
-    .send({
-      // проверяем статус и выставляем сообщение в зависимости от него
-      message: statusCode === 500
-        ? 'На сервере произошла ошибка'
-        : message,
-    });
+  res.status(statusCode).send({
+    // проверяем статус и выставляем сообщение в зависимости от него
+    message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
+  });
   next();
 });
 
