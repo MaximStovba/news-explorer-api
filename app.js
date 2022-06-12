@@ -27,7 +27,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // подключаемся к серверу mongo
 // -------------------------------
 mongoose
-  .connect('mongodb://localhost:27017/newsdb', {
+  .connect('mongodb://mongo:27017/newsdb', {
     useNewUrlParser: true,
     useCreateIndex: true,
     useFindAndModify: false,
@@ -81,7 +81,7 @@ app.post(
       password: Joi.string().required().min(8),
     }),
   }),
-  createUser
+  createUser,
 );
 
 app.post(
@@ -93,7 +93,7 @@ app.post(
       password: Joi.string().required().min(8),
     }),
   }),
-  login
+  login,
 );
 
 // мидлвер авторизации пользователя
