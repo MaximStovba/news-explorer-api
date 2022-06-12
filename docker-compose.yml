@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - ./data-volume:/data/db
+    restart: always
+    networks:
+      - awesome
+
+  app:
+    container_name: app
+    build:
+      context: .
+    ports:
+      - '3001:3001'
+    depends_on:
+      - mongo
+    restart: always
+    networks:
+      - awesome
+
+volumes:
+  data-volume:
+
+networks:
+  awesome:
+    driver: bridge

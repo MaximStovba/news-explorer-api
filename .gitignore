@@ -16,3 +16,5 @@ node_modules
 
 # Process.env
 .env
+
+data-volume
