@@ -2,7 +2,9 @@
 
 API of the News Explorer project, which includes authorization and registration of users, operations with articles and users.
 
-## App listening on port 3001
+### Heroku deploy
+
+* [https://news-explorer-api.herokuapp.com](https://news-explorer-api.herokuapp.com)
 
 ## API description
 
