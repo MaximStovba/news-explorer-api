@@ -14,7 +14,7 @@ const { auth } = require('./middlewares/auth');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 // Слушаем 3000 порт
-const { PORT = 3001 } = process.env;
+const { PORT = 3001, DB_URL } = process.env;
 
 const app = express();
 
@@ -27,7 +27,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // подключаемся к серверу mongo
 // -------------------------------
 mongoose
-  .connect('mongodb://mongo:27017/newsdb', {
+  .connect(DB_URL, {
     useNewUrlParser: true,
     useCreateIndex: true,
     useFindAndModify: false,
@@ -43,6 +43,7 @@ mongoose
 // ----------------- CORS ---------------- //
 const whitelist = [
   'http://localhost:3000',
+  'https://maximstovba.github.io',
   // Адреса не валидны:
   // 'https://www.newsex.students.nomoreparties.co',
   // 'http://www.newsex.students.nomoreparties.co',
